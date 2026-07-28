@@ -1,7 +1,7 @@
 // EC225 Cruise Torque & Fuel Burn - Service Worker
 // Caches the app for full offline use after first load
 
-const CACHE_NAME = 'ec225-cruise-torque-v8';
+const CACHE_NAME = 'ec225-cruise-torque-v10';
 const FILES_TO_CACHE = [
   './',
   './index.html'
