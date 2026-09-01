@@ -166,8 +166,8 @@
 
   <div class="section">
     <div class="section-title">Cruise Power Margin (FLI = 0.5 Below MCP)</div>
-    <div class="section-sub">Unchecked, cruise may plan right up to AEO Max Continuous. Checked: plan cruise 7% torque below AEO Max Continuous, IAW Flight Crew Operating Manual. Costs a few knots where power is already near the limit &mdash; heavy, hot, or high.</div>
-    <div class="equip-row"><input type="checkbox" id="fcop-margin" checked onchange="compute()"><label for="fcop-margin">Hold 7% below AEO Max Continuous (FCOP)</label></div>
+    <div class="section-sub">Unchecked, cruise may plan right up to AEO Max Continuous. Checked: plan cruise 7% torque below AEO Max Continuous, IAW Flight Crew Operating Manual (FCOM). Costs a few knots where power is already near the limit &mdash; heavy, hot, or high.</div>
+    <div class="equip-row"><input type="checkbox" id="fcop-margin" checked onchange="compute()"><label for="fcop-margin">Hold 7% below AEO Max Continuous (FCOM)</label></div>
   </div>
 
   <div class="section">
@@ -473,14 +473,14 @@ function lookupAeoMax(hp, oat){
 // ec225-mission-fuel so the two tools always agree at the same Hp/OAT/weight):
 //   - box UNCHECKED -> 0%: may run right up to AEO Max Continuous.
 //   - box CHECKED (default) -> 7%: hold 7% torque below AEO Max Continuous
-//     per FCOP. An operational power margin, not a chart-envelope limit.
+//     per FCOM. An operational power margin, not a chart-envelope limit.
 // When the 7% margin is unachievable at any charted TAS, fall back to plain
 // AEO Max Continuous and flag it, rather than returning no answer at all.
 const CRUISE_MARGIN_AEO_PCT = 0;
-const CRUISE_MARGIN_FCOP_PCT = 7;
+const CRUISE_MARGIN_FCOM_PCT = 7;
 function cruiseMarginPct(){
   const el = document.getElementById('fcop-margin');
-  return (el && !el.checked) ? CRUISE_MARGIN_AEO_PCT : CRUISE_MARGIN_FCOP_PCT;
+  return (el && !el.checked) ? CRUISE_MARGIN_AEO_PCT : CRUISE_MARGIN_FCOM_PCT;
 }
 const MCP_MARGIN_PCT = 1; // legacy ~0.5 FLI constant, retained for reference
 // Returns { tas, marginLost }; tas === null only if even MCP can't be met.
@@ -742,15 +742,15 @@ function calc1(){
       banner.innerHTML = '<div class="banner warn">Exceeds AEO Max Continuous (' + aeoMax.toFixed(1) + '%) for this Hp/OAT &mdash; not sustainable in level flight at max continuous power.</div>';
     } else if (marginLost){
       torqueEl.classList.add('warn');
-      banner.innerHTML = '<div class="banner warn"><strong>FCOP ' + CRUISE_MARGIN_FCOP_PCT + '% margin NOT achievable here</strong> &mdash; no charted TAS keeps torque that far below AEO Max Continuous (' + aeoMax.toFixed(1) + '%) at this weight/Hp/OAT. Showing the result at AEO Max Continuous itself, with no power margin in reserve.</div>';
+      banner.innerHTML = '<div class="banner warn"><strong>FCOM ' + CRUISE_MARGIN_FCOM_PCT + '% margin NOT achievable here</strong> &mdash; no charted TAS keeps torque that far below AEO Max Continuous (' + aeoMax.toFixed(1) + '%) at this weight/Hp/OAT. Showing the result at AEO Max Continuous itself, with no power margin in reserve.</div>';
     } else if (tableADirect){
       torqueEl.classList.remove('warn');
       banner.innerHTML = '<div class="banner warn">Fig n/1 has no best-range TAS charted at this weight/Hp/OAT (off the plotted edge of the chart) &mdash; showing the fastest TAS from Fig n/2 that still keeps torque ' + (cruiseMarginPct() > 0 ? 'at least ' + cruiseMarginPct() + '% below' : 'at or below') + ' AEO Max Continuous (' + aeoMax.toFixed(1) + '%) instead. This is a fallback, not the book\'s best-range recommendation.</div>';
     } else if (mcpCapped){
       torqueEl.classList.remove('warn');
       banner.innerHTML = cruiseMarginPct() > 0
-        ? '<div class="banner warn">TAS reduced from chart-recommended ' + Math.round(tasBeforeChartCap) + ' kt to ' + tasRounded + ' kt to hold torque ' + cruiseMarginPct() + '% below AEO Max Continuous (' + aeoMax.toFixed(1) + '%) &mdash; FCOP operational power margin.</div>'
-        : '<div class="banner warn">TAS reduced from chart-recommended ' + Math.round(tasBeforeChartCap) + ' kt to ' + tasRounded + ' kt to keep torque at or below AEO Max Continuous (' + aeoMax.toFixed(1) + '%). No additional margin held (FCOP 7% checkbox is OFF).</div>';
+        ? '<div class="banner warn">TAS reduced from chart-recommended ' + Math.round(tasBeforeChartCap) + ' kt to ' + tasRounded + ' kt to hold torque ' + cruiseMarginPct() + '% below AEO Max Continuous (' + aeoMax.toFixed(1) + '%) &mdash; FCOM operational power margin.</div>'
+        : '<div class="banner warn">TAS reduced from chart-recommended ' + Math.round(tasBeforeChartCap) + ' kt to ' + tasRounded + ' kt to keep torque at or below AEO Max Continuous (' + aeoMax.toFixed(1) + '%). No additional margin held (FCOM 7% checkbox is OFF).</div>';
     } else if (chartCapped){
       torqueEl.classList.remove('warn');
       banner.innerHTML = '<div class="banner warn">Table B has no torque/fuel data at the chart-recommended ' + Math.round(tasChart) + ' kt for this weight/Hp/OAT &mdash; showing the fastest charted TAS that does have data (' + tasRounded + ' kt) instead.</div>';
